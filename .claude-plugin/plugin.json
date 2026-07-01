@@ -1,0 +1,13 @@
+{
+  "name": "youtube-team-os",
+  "description": "A multi-role YouTube production OS. Orchestrates five specialist agents (producer, writer, editor, thumbnail, growth) through a persistent filesystem-based project state. Covers ideation → script → edit → publish → postmortem.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Jeremie Tisby",
+    "email": "jtisby@gmail.com"
+  },
+  "homepage": "https://github.com/jtisby/youtube-team-os",
+  "license": "MIT",
+  "keywords": ["youtube", "content", "production", "multi-agent", "workflow"],
+  "minClaudeCodeVersion": "2.1.0"
+}

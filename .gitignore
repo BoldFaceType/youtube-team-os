@@ -1,0 +1,29 @@
+# Runtime state — not committed
+state/records/session.log
+state/records/writes.log
+
+# Role working state (ephemeral current task)
+state/roles/*/current.md
+
+# OS / editor
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# Secrets / env
+.env
+.env.local
+*.key
+
+# Node (for bin/ scripts)
+node_modules/
+npm-debug.log*
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Zip archives
+*.zip

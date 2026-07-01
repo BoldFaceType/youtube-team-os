@@ -1,0 +1,45 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '[yt-os] Session started' >> \"${CLAUDE_PROJECT_DIR}/state/records/session.log\" 2>/dev/null; date >> \"${CLAUDE_PROJECT_DIR}/state/records/session.log\" 2>/dev/null; exit 0"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "FILE=$(echo \"$CLAUDE_TOOL_INPUT\" | jq -r '.file_path // .path // \"unknown\"' 2>/dev/null); echo \"[write] $(date -Iseconds) $FILE\" >> \"${CLAUDE_PROJECT_DIR}/state/records/writes.log\" 2>/dev/null; exit 0"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '[yt-os] Turn complete at' >> \"${CLAUDE_PROJECT_DIR}/state/records/session.log\" 2>/dev/null; date >> \"${CLAUDE_PROJECT_DIR}/state/records/session.log\" 2>/dev/null; exit 0"
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '[yt-os] Session ended at' >> \"${CLAUDE_PROJECT_DIR}/state/records/session.log\" 2>/dev/null; date >> \"${CLAUDE_PROJECT_DIR}/state/records/session.log\" 2>/dev/null; exit 0"
+          }
+        ]
+      }
+    ]
+  }
+}
