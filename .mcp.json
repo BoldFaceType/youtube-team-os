@@ -1,0 +1,26 @@
+{
+  "mcpServers": {
+    "youtube": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-youtube",
+        "--api-key",
+        "${YOUTUBE_API_KEY}"
+      ],
+      "env": {
+        "YOUTUBE_API_KEY": "${YOUTUBE_API_KEY}"
+      }
+    },
+    "drive": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-gdrive"
+      ],
+      "env": {
+        "GDRIVE_CREDENTIALS": "${GOOGLE_CREDENTIALS}"
+      }
+    }
+  }
+}

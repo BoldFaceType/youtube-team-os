@@ -83,8 +83,51 @@ state/
 /plugin install <marketplace>/youtube-team-os
 ```
 
+## Scripts
+
+| Script | Platform | Purpose |
+|---|---|---|
+| `bin/new-project.ps1 -Slug "my-topic"` | Windows | Scaffold a new project with all state files |
+| `bin/new-project.sh my-topic` | Mac/Linux | Same as above |
+| `bin/validate.ps1` | Windows | Health check: manifest, files, hooks, jq, state dirs |
+| `bin/sync-state.ps1` | Windows | Push deliverables to Google Drive via rclone |
+
+## Agents
+
+Six specialist agents in `agents/` are auto-routed by skills. Each has a scoped
+system prompt, tool list, and model config:
+
+`orchestrator` → `producer` → `writer` → `editor` → `thumbnail` → `growth`
+
+## Monitors
+
+Three background monitors fire on `SessionStart`:
+- **content-calendar-deadlines** — warns if publish date is within 3 days
+- **stale-inbox** — warns if role inbox items are >7 days old
+- **postmortem-due** — reminds when a video is 28–32 days post-publish
+
+Monitors require Node.js on PATH.
+
+## Resources
+
+- `resources/best-practices/youtube-production.md` — hook, retention, CTR, SEO rules
+- `resources/best-practices/claude-code-skills.md` — skill authoring guide
+- `resources/metrics/youtube-kpis.md` — benchmark targets with grade scale
+- `resources/links/tools-and-resources.md` — 50+ curated tool links
+- `resources/scoring/ctr-audit.md` — thumbnail CTR scoring rubric
+
+## MCP Connectors
+
+Pre-configured in `.mcp.json`. See `connectors/mcp-setup.md` for setup steps.
+
+- **youtube** — YouTube Data API v3 (read/write video metadata, fetch analytics)
+- **drive** — Google Drive (sync deliverables to shared team folder)
+
 ## Requirements
 
 - Claude Code v2.1.0+
-- Node.js (for bin/ scripts, optional)
-- YouTube Data API key (for YouTube connector, optional)
+- Node.js v18+ (for `bin/` scripts and monitors)
+- `jq` on PATH (for hooks) — `winget install jqlang.jq` or `brew install jq`
+- YouTube Data API key (optional — for analytics in growth skill)
+- Google credentials (optional — for Drive sync)
+- `rclone` (optional — for `bin/sync-state.ps1`)

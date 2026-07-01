@@ -16,7 +16,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "FILE=$(echo \"$CLAUDE_TOOL_INPUT\" | jq -r '.file_path // .path // \"unknown\"' 2>/dev/null); echo \"[write] $(date -Iseconds) $FILE\" >> \"${CLAUDE_PROJECT_DIR}/state/records/writes.log\" 2>/dev/null; exit 0"
+            "command": "FILE=$(jq -r '.tool_input.file_path // .tool_input.path // \"unknown\"' 2>/dev/null); echo \"[write] $(date -Iseconds) $FILE\" >> \"${CLAUDE_PROJECT_DIR}/state/records/writes.log\" 2>/dev/null; exit 0"
           }
         ]
       }
