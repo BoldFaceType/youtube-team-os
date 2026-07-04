@@ -1,9 +1,10 @@
 #!/usr/bin/env pwsh
 # new-project.ps1 — Scaffold a new youtube-team-os project
 # Usage: .\bin\new-project.ps1 -Slug "pricing-mistakes" [-EpNumber 1]
+#        .\bin\new-project.ps1 -Slug "test" -StateRoot "C:\fixtures\state"   (for tests)
 #
-# Creates: state/projects/YYYY-MM-ep##-slug/ with all required files
-# Updates: state/notes/content-calendar.md
+# Creates: <StateRoot|state>/projects/YYYY-MM-ep##-slug/ with all required files
+# Updates: <StateRoot|state>/notes/content-calendar.md
 
 param(
     [Parameter(Mandatory=$true)]
@@ -13,7 +14,10 @@ param(
     [int]$EpNumber = 0,
 
     [Parameter(Mandatory=$false)]
-    [string]$TargetDate = ""
+    [string]$TargetDate = "",
+
+    [Parameter(Mandatory=$false)]
+    [string]$StateRoot = ""
 )
 
 Set-StrictMode -Version Latest
@@ -23,19 +27,23 @@ $ErrorActionPreference = "Stop"
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $PluginRoot = Split-Path -Parent $ScriptDir
 
+# ── Resolve state root (override for tests, default is real plugin state/) ────
+$StateDir = if ($StateRoot -ne "") { $StateRoot } else { "$PluginRoot\state" }
+New-Item -ItemType Directory -Path $StateDir -Force | Out-Null
+
 # ── Build project ID ──────────────────────────────────────────────────────────
 $YearMonth = Get-Date -Format "yyyy-MM"
 
 if ($EpNumber -eq 0) {
     # Auto-increment: count existing projects this month
-    $ExistingProjects = Get-ChildItem "$PluginRoot\state\projects" -Directory -ErrorAction SilentlyContinue |
+    $ExistingProjects = Get-ChildItem "$StateDir\projects" -Directory -ErrorAction SilentlyContinue |
         Where-Object { $_.Name -like "$YearMonth-*" }
     $EpNumber = $ExistingProjects.Count + 1
 }
 
 $EpPadded = $EpNumber.ToString("D2")
 $ProjectId = "$YearMonth-ep$EpPadded-$Slug"
-$ProjectDir = "$PluginRoot\state\projects\$ProjectId"
+$ProjectDir = "$StateDir\projects\$ProjectId"
 
 # ── Check for duplicates ──────────────────────────────────────────────────────
 if (Test-Path $ProjectDir) {
@@ -105,7 +113,8 @@ foreach ($Stub in $Stubs) {
 }
 
 # ── Update content calendar ───────────────────────────────────────────────────
-$CalendarFile = "$PluginRoot\state\notes\content-calendar.md"
+$CalendarFile = "$StateDir\notes\content-calendar.md"
+New-Item -ItemType Directory -Path "$StateDir\notes" -Force | Out-Null
 
 if ($TargetDate -eq "") {
     $TargetDate = (Get-Date).AddDays(14).ToString("yyyy-MM-dd")
@@ -126,7 +135,9 @@ if (Test-Path $CalendarFile) {
 }
 
 # ── Post to producer inbox ────────────────────────────────────────────────────
-$ProducerInbox = "$PluginRoot\state\roles\producer\inbox.md"
+New-Item -ItemType Directory -Path "$StateDir\roles\producer" -Force | Out-Null
+$ProducerInbox = "$StateDir\roles\producer\inbox.md"
+if (-not (Test-Path $ProducerInbox)) { New-Item -ItemType File -Path $ProducerInbox | Out-Null }
 $InboxEntry = "- [ ] [$ProjectId] Write content brief — state/projects/$ProjectId/brief.md"
 Add-Content $ProducerInbox "`n$InboxEntry" -Encoding UTF8
 

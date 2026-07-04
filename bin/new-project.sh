@@ -1,18 +1,20 @@
 #!/usr/bin/env bash
 # new-project.sh — Scaffold a new youtube-team-os project
-# Usage: ./bin/new-project.sh <slug> [ep-number] [target-date]
+# Usage: ./bin/new-project.sh <slug> [ep-number] [target-date] [state-root]
+#        ./bin/new-project.sh test 0 "" /tmp/fixtures/state   (for tests)
 #
-# Creates: state/projects/YYYY-MM-ep##-slug/ with all required files
-# Updates: state/notes/content-calendar.md
+# Creates: <state-root|state>/projects/YYYY-MM-ep##-slug/ with all required files
+# Updates: <state-root|state>/notes/content-calendar.md
 
 set -euo pipefail
 
 SLUG="${1:-}"
 EP_NUMBER="${2:-0}"
 TARGET_DATE="${3:-}"
+STATE_ROOT_OVERRIDE="${4:-}"
 
 if [[ -z "$SLUG" ]]; then
-    echo "Usage: $0 <slug> [ep-number] [target-date YYYY-MM-DD]" >&2
+    echo "Usage: $0 <slug> [ep-number] [target-date YYYY-MM-DD] [state-root]" >&2
     exit 1
 fi
 
@@ -20,18 +22,26 @@ fi
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PLUGIN_ROOT="$(dirname "$SCRIPT_DIR")"
 
+# ── Resolve state root (override for tests, default is real plugin state/) ────
+if [[ -n "$STATE_ROOT_OVERRIDE" ]]; then
+    STATE_DIR="$STATE_ROOT_OVERRIDE"
+else
+    STATE_DIR="$PLUGIN_ROOT/state"
+fi
+mkdir -p "$STATE_DIR"
+
 # ── Build project ID ──────────────────────────────────────────────────────────
 YEAR_MONTH="$(date +%Y-%m)"
 
 if [[ "$EP_NUMBER" -eq 0 ]]; then
     # Auto-increment: count existing projects this month
-    EXISTING=$(find "$PLUGIN_ROOT/state/projects" -maxdepth 1 -type d -name "${YEAR_MONTH}-*" 2>/dev/null | wc -l)
+    EXISTING=$(find "$STATE_DIR/projects" -maxdepth 1 -type d -name "${YEAR_MONTH}-*" 2>/dev/null | wc -l)
     EP_NUMBER=$((EXISTING + 1))
 fi
 
 EP_PADDED=$(printf "%02d" "$EP_NUMBER")
 PROJECT_ID="${YEAR_MONTH}-ep${EP_PADDED}-${SLUG}"
-PROJECT_DIR="$PLUGIN_ROOT/state/projects/$PROJECT_ID"
+PROJECT_DIR="$STATE_DIR/projects/$PROJECT_ID"
 
 # ── Check for duplicates ──────────────────────────────────────────────────────
 if [[ -d "$PROJECT_DIR" ]]; then
@@ -101,7 +111,8 @@ for STUB in outline script edit-notes thumbnail-options publish-plan postmortem;
 done
 
 # ── Update content calendar ───────────────────────────────────────────────────
-CALENDAR="$PLUGIN_ROOT/state/notes/content-calendar.md"
+mkdir -p "$STATE_DIR/notes"
+CALENDAR="$STATE_DIR/notes/content-calendar.md"
 
 if [[ -z "$TARGET_DATE" ]]; then
     # Default: 14 days from today
@@ -128,7 +139,9 @@ EOF
 fi
 
 # ── Post to producer inbox ────────────────────────────────────────────────────
-INBOX="$PLUGIN_ROOT/state/roles/producer/inbox.md"
+mkdir -p "$STATE_DIR/roles/producer"
+INBOX="$STATE_DIR/roles/producer/inbox.md"
+touch "$INBOX"
 echo "" >> "$INBOX"
 echo "- [ ] [$PROJECT_ID] Write content brief — state/projects/$PROJECT_ID/brief.md" >> "$INBOX"
 

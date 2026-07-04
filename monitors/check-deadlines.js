@@ -26,8 +26,12 @@ for (const line of lines) {
   if (!match) continue;
 
   const [, projectId, , targetDateStr, stage] = match;
-  const targetDate = new Date(targetDateStr);
-  targetDate.setHours(0, 0, 0, 0);
+  // Parse the YYYY-MM-DD components directly into a local-midnight Date, rather than
+  // `new Date(targetDateStr)` (parsed as UTC midnight) followed by `.setHours(0,0,0,0)`
+  // (which re-interprets in local time) — that combination silently shifts the date
+  // back a day in any timezone behind UTC (TM-6).
+  const [ty, tm, td] = targetDateStr.split('-').map(Number);
+  const targetDate = new Date(ty, tm - 1, td);
 
   const daysUntil = Math.round((targetDate - today) / (1000 * 60 * 60 * 24));
   const doneStages = ['PUBLISH', 'POSTMORTEM'];

@@ -42,6 +42,29 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   removed monitors.json checks), presence of `bin/*.ps1`/`bin/*.sh` and
   `connectors/*.md`, and Node.js/rclone availability, none of which were previously
   checked despite being listed in `README.md`'s Requirements (TM-5, New-6, NON-42).
+- `monitors/check-deadlines.js` and `check-postmortem-due.js` — both parsed calendar/
+  activity-log dates via `new Date(str)` (UTC midnight) followed by `.setHours(0,0,0,0)`
+  (local time), which silently shifts the effective date back a day in any timezone
+  behind UTC (TM-6). Found live by `bin/smoke-test.ps1`'s TZ=America/New_York assertion
+  during this remediation, not just by static review — the original plan only scheduled
+  a *regression test* for this, not a fix, which was an oversight caught by actually
+  running the new test. Both now parse `YYYY-MM-DD` components directly into a
+  local-midnight `Date`, matching `today`'s construction.
+
+### Added
+- `bin/smoke-test.ps1` — deterministic mechanical regression test: validate.ps1,
+  new-project scaffolding (including the TM-4 column-count regression), the actual
+  `hooks.json` command strings (including the TM-3 jq-missing sentinel), and the two
+  monitor scripts under both the default and a non-UTC timezone (TM-6 regression).
+  Supports `-InjectFailure` (proves the test fails when something is actually broken)
+  and `-KeepScratch` (debugging). Does not and cannot exercise the 6 role
+  skills/agents — those are LLM-executed instructions, not deterministic code.
+- `bin/new-project.ps1`/`.sh` — added a `-StateRoot`/positional override so tests (and
+  any future automation) can scaffold into a fixture directory instead of the real
+  `state/` tree.
+- `tests/fixtures/state/` — static, non-date-sensitive example fixture (one project at
+  the PUBLISH stage) for reference; the actual date-sensitive smoke-test assertions
+  generate their own fixtures at run time since a checked-in fixed date would go stale.
 
 ### Planned
 - Weekly planning cron via Claude Code scheduled task (NON-35)

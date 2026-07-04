@@ -38,8 +38,11 @@ for (const projectId of projects) {
   const publishMatch = activity.match(/\[(\d{4}-\d{2}-\d{2})[^\]]*\].*PUBLISH/);
   if (!publishMatch) continue;
 
-  const publishDate = new Date(publishMatch[1]);
-  publishDate.setHours(0, 0, 0, 0);
+  // See check-deadlines.js for why this doesn't use `new Date(str)` + setHours(0,0,0,0)
+  // (TM-6: UTC-parse followed by local-reinterpret silently shifts the date back a day
+  // in timezones behind UTC).
+  const [py, pm, pd] = publishMatch[1].split('-').map(Number);
+  const publishDate = new Date(py, pm - 1, pd);
   const daysSincePublish = Math.round((today - publishDate) / (1000 * 60 * 60 * 24));
 
   if (daysSincePublish >= 28 && daysSincePublish <= 35) {
