@@ -91,7 +91,10 @@ runs the deadline/postmortem-due reminder checks on `SessionStart` (see Monitors
 | `bin/new-project.ps1 -Slug "my-topic"` | Windows | Scaffold a new project with all state files |
 | `bin/new-project.sh my-topic` | Mac/Linux | Same as above |
 | `bin/validate.ps1` | Windows | Health check: manifest, files, hooks, jq, state dirs |
+| `bin/validate.sh` | Mac/Linux | Same as above |
 | `bin/sync-state.ps1` | Windows | Push deliverables to Google Drive via rclone |
+| `bin/sync-state.sh` | Mac/Linux | Same as above |
+| `bin/smoke-test.ps1` | Windows | Deterministic mechanical regression test — see Testing below |
 
 ## Agents
 
@@ -125,6 +128,30 @@ Both require Node.js on PATH.
 packages were removed (one didn't exist on npm, the other is deprecated). See
 `connectors/mcp-setup.md` for the current manual/rclone-based alternatives and how to wire
 up a real MCP server later if one becomes available.
+
+## Testing
+
+Two layers, because the 6 role skills/agents are markdown instructions executed by an
+LLM, not deterministic code — no script can drive them the way a unit test drives a
+function.
+
+1. **Structural + mechanical check** — `bin/validate.ps1`/`.sh` (manifest, required
+   files, hooks/monitor wiring, dependencies, state dirs) then
+   `bin/smoke-test.ps1` (scaffolding, the actual `hooks.json` command strings including
+   the jq-missing fallback, and the deadline/postmortem-due scripts under both the
+   default and a non-UTC timezone). Both are safe to run in CI — no LLM calls, no cost.
+   Run `bin/smoke-test.ps1 -InjectFailure` occasionally to confirm the test itself still
+   fails when something is actually broken.
+2. **Full pipeline proof** — `tests/e2e-runbook.md`: a manual, documented `claude -p`
+   walkthrough of all 6 roles against a scratch project directory, with a pass/fail
+   checklist. Not automated — a real headless run costs API tokens and its pass/fail is
+   a human judgment call on deliverable quality, not a hard assertion. Run it after any
+   change to a skill, agent, or the state-handoff contract between roles.
+
+**Contributor note:** each role's `skills/<role>/SKILL.md` and `agents/<role>.md`
+independently restate the same deliverable formats, quality gates, and procedures.
+Nothing enforces they stay in sync — if you change one, check whether the other needs
+the same update before committing.
 
 ## Requirements
 

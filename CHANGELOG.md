@@ -69,11 +69,32 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   pipeline headlessly (`claude -p`) against a scratch project directory, with a
   pass/fail checklist. Deliberately a manual runbook, not a CI job (real API cost, and
   pass/fail is a human judgment call on deliverable quality, not a hard assertion).
+- `bin/sync-state.sh` — Mac/Linux port of `sync-state.ps1` (rclone-based Drive sync);
+  closes the last Windows-only script gap (New-4, NON-36).
+- `bin/validate.sh` — Mac/Linux port of `validate.ps1`, kept in parity via CI (see below).
+- `LICENSE` — MIT, matching `plugin.json`'s existing `license` field, which had no
+  corresponding file (TM-8).
+- `README.md` — added a Testing section (closes the dangling reference from
+  `CLAUDE.md`, New-5) and a contributor note about `skills/`/`agents/` duplication
+  (TM-10).
+- `.github/workflows/validate.yml` — runs `validate.ps1`, `validate.sh`, and
+  `smoke-test.ps1` (including a `-InjectFailure` self-check) on every push/PR to `main`.
+  Deliberately does not run `tests/e2e-runbook.md` — see that file for why.
+
+### Fixed (cont.)
+- `.claude-plugin/plugin.json` — `homepage` pointed at `github.com/jtisby/...`; the
+  actual git remote and `CHANGELOG.md`'s own compare links use
+  `github.com/BoldFaceType/...`. Aligned (TM-7). Removed `minClaudeCodeVersion` — not a
+  field in the official plugin manifest schema (checked 3 ways via Context7); likely
+  silently ignored, but dead/invented metadata (TM-9). `settings.json`'s `agent` field
+  was checked against the same schema and confirmed genuinely documented — no change
+  needed there.
 
 ### Planned
 - Weekly planning cron via Claude Code scheduled task (NON-35)
-- Google Drive connector and deliverable sync (NON-36)
 - Community marketplace submission (NON-37)
+- Rewrite `connectors/mcp-setup.md` guidance once a real, maintained YouTube MCP server is
+  identified (superseded interim guidance already shipped — see Fixed above)
 
 ---
 

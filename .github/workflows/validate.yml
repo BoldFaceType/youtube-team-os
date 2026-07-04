@@ -1,0 +1,40 @@
+name: Validate
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  validate-and-smoke-test:
+    # ubuntu-latest ships pwsh (PowerShell Core), jq, and node by default, so both
+    # scripts run as-is without needing the Windows-specific tooling they were
+    # originally authored for. This is a deterministic, no-LLM-cost check — see
+    # tests/e2e-runbook.md for the separate manual full-pipeline proof, which is
+    # intentionally NOT run here (real API cost, human-judged pass/fail).
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run validate.ps1
+        shell: pwsh
+        run: ./bin/validate.ps1
+
+      - name: Run validate.sh (cross-check the bash port stays in sync)
+        shell: bash
+        run: ./bin/validate.sh
+
+      - name: Run smoke-test.ps1
+        shell: pwsh
+        run: ./bin/smoke-test.ps1
+
+      - name: Confirm smoke-test.ps1 fails when it should (-InjectFailure)
+        shell: pwsh
+        run: |
+          ./bin/smoke-test.ps1 -InjectFailure
+          if ($LASTEXITCODE -eq 0) {
+            Write-Error "smoke-test.ps1 -InjectFailure should have failed but reported success — the test has lost its teeth"
+            exit 1
+          }
+          Write-Host "OK: -InjectFailure correctly reported failure (exit $LASTEXITCODE)"

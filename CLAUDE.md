@@ -134,8 +134,9 @@ claude --plugin-dir .
 |---|---|---|
 | `bin/new-project.ps1` | Windows | Scaffold a new project folder |
 | `bin/new-project.sh` | Mac/Linux | Scaffold a new project folder |
-| `bin/validate.ps1` | Windows | Run `claude plugin validate` |
-| `bin/sync-state.ps1` | Windows | Push state snapshot to Google Drive |
+| `bin/validate.ps1` / `.sh` | Windows / Mac/Linux | Manifest, files, hooks, monitor wiring, dependencies, state dirs |
+| `bin/smoke-test.ps1` | Windows | Deterministic mechanical regression test (see `tests/e2e-runbook.md` for the LLM-driven proof) |
+| `bin/sync-state.ps1` / `.sh` | Windows / Mac/Linux | Push state snapshot to Google Drive via rclone |
 
 ---
 
@@ -152,4 +153,5 @@ claude --plugin-dir .
 ## Testing
 
 See `README.md` → Testing section for the full test protocol.
-Quick smoke test: `bin/validate.ps1` then run `/youtube-team-os:orchestrator "test idea"`.
+Quick check: `bin/validate.ps1`/`.sh` then `bin/smoke-test.ps1` (mechanical, safe for CI).
+Full pipeline proof: `tests/e2e-runbook.md` (manual, exercises the actual role skills).

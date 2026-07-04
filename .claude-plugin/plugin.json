@@ -6,8 +6,7 @@
     "name": "Jeremie Tisby",
     "email": "jtisby@gmail.com"
   },
-  "homepage": "https://github.com/jtisby/youtube-team-os",
+  "homepage": "https://github.com/BoldFaceType/youtube-team-os",
   "license": "MIT",
-  "keywords": ["youtube", "content", "production", "multi-agent", "workflow"],
-  "minClaudeCodeVersion": "2.1.0"
+  "keywords": ["youtube", "content", "production", "multi-agent", "workflow"]
 }
