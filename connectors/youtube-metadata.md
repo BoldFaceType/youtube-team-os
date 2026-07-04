@@ -3,31 +3,27 @@
 ## Purpose
 Fetch video stats, comments, channel metrics, and transcript data from YouTube.
 
-## Recommended MCP / Tool
-- **YouTube Data API v3** via an MCP server
-- Or: use `yt-dlp` in `bin/` for transcript extraction
+## Current status: manual input only
 
-## Setup
-1. Create a Google Cloud project and enable YouTube Data API v3
-2. Generate an API key (no OAuth needed for public data)
-3. Add to `.mcp.json` at plugin root:
+No currently-maintained MCP server for the YouTube Data API v3 was found (the previously
+configured `@modelcontextprotocol/server-youtube` package does not exist on npm). Until a
+real, maintained MCP server is identified and adopted, analytics capture in the `growth`
+skill uses manual input: leave `[VIEWS]`, `[CTR]`, and similar placeholders in
+`state/records/analytics-<id>.md` and `state/projects/<id>/postmortem.md` for a human to
+fill in from YouTube Studio.
 
-```json
-{
-  "mcpServers": {
-    "youtube": {
-      "command": "npx",
-      "args": ["@your-mcp/youtube-data", "--api-key", "${YOUTUBE_API_KEY}"]
-    }
-  }
-}
-```
+## Manual data sources
+- **YouTube Studio Analytics** (`studio.youtube.com`) — views, CTR, retention, watch time
+- **YouTube Studio → Comments** — top comments for postmortem/community context
+- `yt-dlp` (in `bin/` if added later) can extract transcripts locally without any API key
 
-## Available Operations
-- `get_video_stats(video_id)` → views, CTR, retention, likes, comments
-- `get_channel_stats(channel_id)` → subscribers, total views, upload count
-- `get_video_comments(video_id, limit)` → top comments for postmortem/community
-- `get_transcript(video_id)` → raw transcript for repurposing
+## If a real MCP server becomes available
+Add it to `.mcp.json`'s `mcpServers` object (currently empty) as a server named `youtube`,
+matching the shape documented in `connectors/mcp-setup.md`. Update `agents/growth.md` and
+`skills/growth/SKILL.md` to reference it once it's verified working end to end
+(`npx -y <package>` succeeds and returns real data for a test video ID).
 
 ## Usage in Skills
-Reference in growth skill postmortem step to auto-populate analytics snapshot.
+Referenced in the growth skill's postmortem step — see "What you must NOT do" in
+`skills/growth/SKILL.md`: never fabricate stats, always use placeholders until real
+numbers are entered.

@@ -82,8 +82,8 @@ to guarantee all subfiles are scaffolded correctly.
    (`[VIEWS]`, `[CTR]`) for the human to fill.
 4. **Hook jq path** — hooks parse `jq -r '.tool_input.file_path'` from stdin.
    Do not change the hooks schema without updating `hooks/hooks.json`.
-5. **`.mcp.json` secrets** — YouTube API key and Google credentials are injected
-   via env vars (`YOUTUBE_API_KEY`, `GOOGLE_CREDENTIALS`). Never hardcode them.
+5. **No hardcoded secrets** — if an MCP server is added to `.mcp.json` in the future,
+   inject credentials via env vars, never hardcode them.
 6. **No `localStorage` or browser storage** — n/a for this plugin, but noted for
    any HTML artifact generation.
 
@@ -91,23 +91,25 @@ to guarantee all subfiles are scaffolded correctly.
 
 ## MCP connectors
 
-- **YouTube Data API v3** — configured in `.mcp.json` as server `"youtube"`.
-  Used in the `growth` skill for analytics capture and postmortem population.
-- **Google Drive** — configured in `.mcp.json` as server `"drive"`.
-  Used to sync deliverables to a shared team folder.
-
-See `connectors/` for full setup docs.
+`.mcp.json` currently defines no servers (`{"mcpServers": {}}`). YouTube analytics and
+Drive sync are manual/rclone-based for now — see `connectors/youtube-metadata.md` and
+`connectors/drive.md` for why and what to use instead. See `connectors/mcp-setup.md` for
+how to wire up a real MCP server later if one becomes available.
 
 ---
 
 ## Hooks
 
 `hooks/hooks.json` runs automatically on:
-- `SessionStart` — logs session start to `state/records/session.log`
+- `SessionStart` — logs session start to `state/records/session.log`, and runs the
+  deadline (`monitors/check-deadlines.js`) and postmortem-due
+  (`monitors/check-postmortem-due.js`) reminder checks
 - `PostToolUse` (Write|Edit) — logs every file write to `state/records/writes.log`
+  (writes a `jq-missing` sentinel line instead of a blank line if `jq` isn't installed)
 - `Stop` / `SessionEnd` — logs session end
 
-Hooks require `jq` on PATH. Install: `winget install jqlang.jq` (Windows) or
+Hooks require `jq` on PATH for the write-audit log, and Node.js on PATH for the two
+deadline/postmortem reminder checks. Install jq: `winget install jqlang.jq` (Windows) or
 `brew install jq` (Mac).
 
 ---

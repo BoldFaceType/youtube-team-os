@@ -61,7 +61,6 @@ $RequiredFiles = @(
     "CLAUDE.md",
     "README.md",
     "CHANGELOG.md",
-    ".mcp.json",
     "hooks\hooks.json",
     "settings.json",
     "skills\orchestrator\SKILL.md",
@@ -92,12 +91,14 @@ if (Test-Path $McpPath) {
     try {
         $Mcp = Get-Content $McpPath | ConvertFrom-Json
         Check ".mcp.json valid JSON" $true ""
-        Check "mcpServers.youtube defined" ($null -ne $Mcp.mcpServers.youtube) "YouTube MCP not configured"
-        Check "mcpServers.drive defined"   ($null -ne $Mcp.mcpServers.drive)   "Drive MCP not configured"
+        # No servers are expected to be configured right now — see connectors/mcp-setup.md.
+        # This just confirms the file parses; it intentionally does not require any server.
     } catch {
         $Errors += ".mcp.json — Invalid JSON"
         Write-Host "  ✗ .mcp.json — Invalid JSON" -ForegroundColor Red
     }
+} else {
+    Check ".mcp.json exists" $false "Missing .mcp.json (should exist, even with an empty mcpServers object)"
 }
 
 # ── 4. Hooks validation ───────────────────────────────────────────────────────
@@ -123,7 +124,7 @@ Write-Host ""
 Write-Host "── Dependencies ───────────────────────" -ForegroundColor White
 
 $JqAvailable = $null -ne (Get-Command jq -ErrorAction SilentlyContinue)
-Check "jq on PATH" $JqAvailable "Hooks require jq. Install: winget install jqlang.jq" -Warn
+Check "jq on PATH" $JqAvailable "Write-audit hook requires jq for the file path (falls back to a jq-missing sentinel line otherwise). Install: winget install jqlang.jq" -Warn
 
 $ClaudeAvailable = $null -ne (Get-Command claude -ErrorAction SilentlyContinue)
 Check "claude CLI on PATH" $ClaudeAvailable "Install Claude Code: https://claude.ai/code" -Warn

@@ -70,12 +70,13 @@ state/
 
 ## Hooks
 
-`hooks/hooks.json` logs session starts/ends and every file write to `state/records/`.
+`hooks/hooks.json` logs session starts/ends and every file write to `state/records/`, and
+runs the deadline/postmortem-due reminder checks on `SessionStart` (see Monitors below).
 
 ## Connectors
 
-- `connectors/youtube-metadata.md` — YouTube Data API v3 via MCP
-- `connectors/drive.md` — Google Drive for asset sharing
+- `connectors/youtube-metadata.md` — YouTube analytics (manual input for now — see file)
+- `connectors/drive.md` — Google Drive sync via `bin/sync-state.ps1`/`.sh` (rclone-based)
 
 ## Install from marketplace
 
@@ -101,12 +102,14 @@ system prompt, tool list, and model config:
 
 ## Monitors
 
-Three background monitors fire on `SessionStart`:
-- **content-calendar-deadlines** — warns if publish date is within 3 days
-- **stale-inbox** — warns if role inbox items are >7 days old
-- **postmortem-due** — reminds when a video is 28–32 days post-publish
+Two reminder checks run via `hooks/hooks.json` on `SessionStart` (not via
+`monitors/monitors.json`, which is intentionally empty — see `CHANGELOG.md`):
+- **content-calendar-deadlines** (`monitors/check-deadlines.js`) — warns if a project's
+  publish date is within 3 days and it isn't yet at PUBLISH/POSTMORTEM stage
+- **postmortem-due** (`monitors/check-postmortem-due.js`) — reminds when a video is
+  28–35 days post-publish and its postmortem is still a stub
 
-Monitors require Node.js on PATH.
+Both require Node.js on PATH.
 
 ## Resources
 
@@ -118,16 +121,14 @@ Monitors require Node.js on PATH.
 
 ## MCP Connectors
 
-Pre-configured in `.mcp.json`. See `connectors/mcp-setup.md` for setup steps.
-
-- **youtube** — YouTube Data API v3 (read/write video metadata, fetch analytics)
-- **drive** — Google Drive (sync deliverables to shared team folder)
+`.mcp.json` currently defines no servers — the previously configured YouTube and Drive MCP
+packages were removed (one didn't exist on npm, the other is deprecated). See
+`connectors/mcp-setup.md` for the current manual/rclone-based alternatives and how to wire
+up a real MCP server later if one becomes available.
 
 ## Requirements
 
 - Claude Code v2.1.0+
-- Node.js v18+ (for `bin/` scripts and monitors)
-- `jq` on PATH (for hooks) — `winget install jqlang.jq` or `brew install jq`
-- YouTube Data API key (optional — for analytics in growth skill)
-- Google credentials (optional — for Drive sync)
-- `rclone` (optional — for `bin/sync-state.ps1`)
+- Node.js v18+ (for `bin/` scripts and the deadline/postmortem hooks)
+- `jq` on PATH (for the write-audit hook) — `winget install jqlang.jq` or `brew install jq`
+- `rclone` (optional — for `bin/sync-state.ps1`/`.sh` Drive sync)

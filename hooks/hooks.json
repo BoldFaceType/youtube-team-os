@@ -5,7 +5,15 @@
         "hooks": [
           {
             "type": "command",
-            "command": "echo '[yt-os] Session started' >> \"${CLAUDE_PROJECT_DIR}/state/records/session.log\" 2>/dev/null; date >> \"${CLAUDE_PROJECT_DIR}/state/records/session.log\" 2>/dev/null; exit 0"
+            "command": "mkdir -p \"${CLAUDE_PROJECT_DIR}/state/records\" 2>/dev/null; echo '[yt-os] Session started' >> \"${CLAUDE_PROJECT_DIR}/state/records/session.log\" 2>/dev/null; date >> \"${CLAUDE_PROJECT_DIR}/state/records/session.log\" 2>/dev/null; exit 0"
+          },
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/monitors/check-deadlines.js\" 2>/dev/null; exit 0"
+          },
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/monitors/check-postmortem-due.js\" 2>/dev/null; exit 0"
           }
         ]
       }
@@ -16,7 +24,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "FILE=$(jq -r '.tool_input.file_path // .tool_input.path // \"unknown\"' 2>/dev/null); echo \"[write] $(date -Iseconds) $FILE\" >> \"${CLAUDE_PROJECT_DIR}/state/records/writes.log\" 2>/dev/null; exit 0"
+            "command": "mkdir -p \"${CLAUDE_PROJECT_DIR}/state/records\" 2>/dev/null; if ! command -v jq >/dev/null 2>&1; then echo \"[write] jq-missing $(date -Iseconds)\" >> \"${CLAUDE_PROJECT_DIR}/state/records/writes.log\" 2>/dev/null; exit 0; fi; FILE=$(jq -r '.tool_input.file_path // .tool_input.path // \"unknown\"' 2>/dev/null); echo \"[write] $(date -Iseconds) $FILE\" >> \"${CLAUDE_PROJECT_DIR}/state/records/writes.log\" 2>/dev/null; exit 0"
           }
         ]
       }
@@ -26,7 +34,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "echo '[yt-os] Turn complete at' >> \"${CLAUDE_PROJECT_DIR}/state/records/session.log\" 2>/dev/null; date >> \"${CLAUDE_PROJECT_DIR}/state/records/session.log\" 2>/dev/null; exit 0"
+            "command": "mkdir -p \"${CLAUDE_PROJECT_DIR}/state/records\" 2>/dev/null; echo '[yt-os] Turn complete at' >> \"${CLAUDE_PROJECT_DIR}/state/records/session.log\" 2>/dev/null; date >> \"${CLAUDE_PROJECT_DIR}/state/records/session.log\" 2>/dev/null; exit 0"
           }
         ]
       }
@@ -36,7 +44,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "echo '[yt-os] Session ended at' >> \"${CLAUDE_PROJECT_DIR}/state/records/session.log\" 2>/dev/null; date >> \"${CLAUDE_PROJECT_DIR}/state/records/session.log\" 2>/dev/null; exit 0"
+            "command": "mkdir -p \"${CLAUDE_PROJECT_DIR}/state/records\" 2>/dev/null; echo '[yt-os] Session ended at' >> \"${CLAUDE_PROJECT_DIR}/state/records/session.log\" 2>/dev/null; date >> \"${CLAUDE_PROJECT_DIR}/state/records/session.log\" 2>/dev/null; exit 0"
           }
         ]
       }

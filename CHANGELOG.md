@@ -9,6 +9,26 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Fixed
+- `monitors/monitors.json` — was built on a schema that doesn't match the real Claude Code
+  plugin spec (wrapped object with invented `trigger`/`timeout`/`failureMode` fields, and
+  one-shot scripts instead of persistent watchers). Emptied to a valid `[]`; the deadline
+  and postmortem-due reminder checks now run from `hooks/hooks.json`'s `SessionStart` hooks
+  instead (TM-1, NON-46).
+- `.mcp.json` — the `youtube` server referenced a package that doesn't exist on npm
+  (`@modelcontextprotocol/server-youtube`, 404); the `drive` server referenced a package npm
+  marks "no longer supported". Emptied to `{"mcpServers": {}}`. YouTube analytics is now
+  manual-input (see `connectors/youtube-metadata.md`); Drive sync uses the existing
+  rclone-based `bin/sync-state.ps1`/`.sh` instead of MCP (see `connectors/drive.md`)
+  (TM-2, NON-39).
+- `hooks/hooks.json` — the `PostToolUse` write-audit hook silently wrote a blank log line if
+  `jq` was missing; it now writes an explicit `jq-missing` sentinel line instead (TM-3,
+  NON-40).
+- All `SessionStart`/`PostToolUse`/`Stop`/`SessionEnd` hook commands now defensively
+  `mkdir -p state/records` before writing, so they no longer silently no-op if that
+  directory doesn't exist yet (part of the New-3 fresh-clone fix, landed here since it
+  touches the same hook command strings as the two fixes above).
+
 ### Planned
 - Weekly planning cron via Claude Code scheduled task (NON-35)
 - Google Drive connector and deliverable sync (NON-36)

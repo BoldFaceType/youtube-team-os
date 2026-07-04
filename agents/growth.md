@@ -84,10 +84,10 @@ Template:
 - Do not write a postmortem before 28 days post-publish
 - Do not repurpose content that hasn't been approved for distribution
 
-## Analytics via MCP
+## Analytics: manual input
 
-If `youtube` MCP server is connected:
-```
-/mcp youtube videos_list --id <video_id> --part statistics,contentDetails
-```
-Extracts: viewCount, likeCount, commentCount, duration, and more.
+No maintained MCP server for the YouTube Data API is currently configured (see
+`connectors/youtube-metadata.md`). Pull stats manually from YouTube Studio Analytics and
+fill them into `state/records/analytics-<id>.md` and `state/projects/<id>/postmortem.md`.
+Leave `[VIEWS]`, `[CTR]`, etc. as placeholders until real numbers are entered — never
+fabricate a number to fill a template.
