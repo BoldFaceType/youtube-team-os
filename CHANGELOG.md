@@ -28,6 +28,10 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   `mkdir -p state/records` before writing, so they no longer silently no-op if that
   directory doesn't exist yet (part of the New-3 fresh-clone fix, landed here since it
   touches the same hook command strings as the two fixes above).
+- `state/notes/content-calendar.md` — seed header only had 4 columns
+  (`Project ID | Title | Target Date | Stage`) while every script and skill/agent doc that
+  writes to it uses 5 (adds `Owner`), and `monitors/check-deadlines.js`'s regex requires
+  5 columns to match a row at all. Header now matches (TM-4, NON-41).
 
 ### Planned
 - Weekly planning cron via Claude Code scheduled task (NON-35)
