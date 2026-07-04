@@ -65,6 +65,10 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - `tests/fixtures/state/` — static, non-date-sensitive example fixture (one project at
   the PUBLISH stage) for reference; the actual date-sensitive smoke-test assertions
   generate their own fixtures at run time since a checked-in fixed date would go stale.
+- `tests/e2e-runbook.md` — documented manual procedure for running the full 6-role
+  pipeline headlessly (`claude -p`) against a scratch project directory, with a
+  pass/fail checklist. Deliberately a manual runbook, not a CI job (real API cost, and
+  pass/fail is a human judgment call on deliverable quality, not a hard assertion).
 
 ### Planned
 - Weekly planning cron via Claude Code scheduled task (NON-35)
