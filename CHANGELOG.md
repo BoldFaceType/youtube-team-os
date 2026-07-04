@@ -32,6 +32,16 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   (`Project ID | Title | Target Date | Stage`) while every script and skill/agent doc that
   writes to it uses 5 (adds `Owner`), and `monitors/check-deadlines.js`'s regex requires
   5 columns to match a row at all. Header now matches (TM-4, NON-41).
+- `state/projects/`, `state/records/` were untracked in git — a fresh clone would be
+  missing these directories entirely, causing the SessionStart/PostToolUse/Stop/SessionEnd
+  hooks to silently no-op and `bin/validate.ps1` to fail its own state-filesystem check on
+  a pristine checkout. Added `.gitkeep` to both (New-3). Deleted `state/deliverables/`
+  (was empty, untracked, and referenced nowhere in any doc, skill, or agent file —
+  superseded by `state/projects/<id>/*.md`).
+- `bin/validate.ps1` — extended to check the hooks-based monitor wiring (replacing the
+  removed monitors.json checks), presence of `bin/*.ps1`/`bin/*.sh` and
+  `connectors/*.md`, and Node.js/rclone availability, none of which were previously
+  checked despite being listed in `README.md`'s Requirements (TM-5, New-6, NON-42).
 
 ### Planned
 - Weekly planning cron via Claude Code scheduled task (NON-35)

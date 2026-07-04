@@ -113,13 +113,64 @@ if (Test-Path $HooksPath) {
         Check "SessionStart hook defined"   ($null -ne $Hooks.hooks.SessionStart)  "Missing SessionStart"
         Check "PostToolUse hook defined"    ($null -ne $Hooks.hooks.PostToolUse)   "Missing PostToolUse"
         Check "SessionEnd hook defined"     ($null -ne $Hooks.hooks.SessionEnd)    "Missing SessionEnd" -Warn
+
+        # Deadline/postmortem reminder logic lives in SessionStart hook commands now
+        # (monitors/monitors.json is intentionally empty — see CHANGELOG.md, TM-1).
+        $SessionStartCommands = ($Hooks.hooks.SessionStart | ForEach-Object { $_.hooks.command }) -join "`n"
+        Check "check-deadlines.js wired into SessionStart" ($SessionStartCommands -like "*check-deadlines.js*") "Deadline reminder hook missing from hooks.json"
+        Check "check-postmortem-due.js wired into SessionStart" ($SessionStartCommands -like "*check-postmortem-due.js*") "Postmortem reminder hook missing from hooks.json"
     } catch {
         $Errors += "hooks.json — Invalid JSON"
         Write-Host "  ✗ hooks.json — Invalid JSON" -ForegroundColor Red
     }
 }
 
-# ── 5. jq availability ───────────────────────────────────────────────────────
+# ── 4b. Monitor scripts referenced by hooks ───────────────────────────────────
+Write-Host ""
+Write-Host "── Monitor scripts ────────────────────" -ForegroundColor White
+
+Check "monitors\check-deadlines.js exists"       (Test-Path "$PluginRoot\monitors\check-deadlines.js")       "File missing"
+Check "monitors\check-postmortem-due.js exists"  (Test-Path "$PluginRoot\monitors\check-postmortem-due.js")  "File missing"
+
+$MonitorsJsonPath = "$PluginRoot\monitors\monitors.json"
+if (Test-Path $MonitorsJsonPath) {
+    $MonitorsRaw = Get-Content $MonitorsJsonPath -Raw
+    try {
+        # Note: `ConvertFrom-Json '[]'` returns $null (a valid empty-array parse), not an
+        # empty array object — treat $null as pass here, don't touch .Count on it.
+        $MonitorsJson = $MonitorsRaw | ConvertFrom-Json
+        Check "monitors.json valid JSON" $true ""
+        $IsBareArrayOrEmpty = ($null -eq $MonitorsJson) -or ($MonitorsJson -is [array]) -or ($MonitorsJson -is [System.Collections.IEnumerable] -and $MonitorsJson -isnot [string])
+        Check "monitors.json is a bare array" $IsBareArrayOrEmpty "Should be a bare JSON array (possibly empty), not a wrapped object — real logic now lives in hooks.json"
+    } catch {
+        $Errors += "monitors.json — Invalid JSON: $_"
+        Write-Host "  ✗ monitors.json — Invalid JSON" -ForegroundColor Red
+    }
+}
+
+# ── 5. Required scripts and docs ──────────────────────────────────────────────
+Write-Host ""
+Write-Host "── Scripts and connector docs ─────────" -ForegroundColor White
+
+$RequiredScripts = @(
+    "bin\new-project.ps1", "bin\new-project.sh",
+    "bin\validate.ps1", "bin\validate.sh",
+    "bin\sync-state.ps1", "bin\sync-state.sh"
+)
+foreach ($Script in $RequiredScripts) {
+    Check $Script (Test-Path "$PluginRoot\$Script") "File missing" -Warn
+}
+
+$RequiredConnectorDocs = @(
+    "connectors\youtube-metadata.md",
+    "connectors\drive.md",
+    "connectors\mcp-setup.md"
+)
+foreach ($Doc in $RequiredConnectorDocs) {
+    Check $Doc (Test-Path "$PluginRoot\$Doc") "File missing"
+}
+
+# ── 6. Dependencies ────────────────────────────────────────────────────────────
 Write-Host ""
 Write-Host "── Dependencies ───────────────────────" -ForegroundColor White
 
@@ -129,7 +180,13 @@ Check "jq on PATH" $JqAvailable "Write-audit hook requires jq for the file path 
 $ClaudeAvailable = $null -ne (Get-Command claude -ErrorAction SilentlyContinue)
 Check "claude CLI on PATH" $ClaudeAvailable "Install Claude Code: https://claude.ai/code" -Warn
 
-# ── 6. State directories ──────────────────────────────────────────────────────
+$NodeAvailable = $null -ne (Get-Command node -ErrorAction SilentlyContinue)
+Check "Node.js on PATH" $NodeAvailable "bin/ scripts and the two SessionStart reminder hooks require Node.js v18+. Install: https://nodejs.org" -Warn
+
+$RcloneAvailable = $null -ne (Get-Command rclone -ErrorAction SilentlyContinue)
+Check "rclone on PATH" $RcloneAvailable "Optional — required only for bin/sync-state.ps1/.sh. Install: winget install Rclone.Rclone" -Warn
+
+# ── 7. State directories ──────────────────────────────────────────────────────
 Write-Host ""
 Write-Host "── State filesystem ───────────────────" -ForegroundColor White
 
