@@ -9,6 +9,24 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Changed
+- `skills/producer/SKILL.md` + `agents/producer.md` — replaced the blind idea-generation
+  step with an evidence-based **Idea Sourcing & Validation** workflow (NON-56): (1) read
+  internal `state/projects/*/postmortem.md` / `state/records/analytics-*.md` evidence
+  first, degrading gracefully on a fresh install (state the absence in the brief, never
+  block); (2) external demand signals per candidate — search-intent check + comparable-
+  channel outlier scan; (3) packaging-first gate — working title + thumbnail concept
+  required before a candidate is selectable; (4) 1–5 scoring rubric across demand
+  evidence / differentiation / channel fit / effort-to-payoff, with the selection reason
+  citing scores; (5) unselected candidates ≥14/20 appended to `state/notes/idea-bank.md`.
+  Both files describe the same workflow (TM-10 two-source-of-truth rule); practice
+  sources are cited in an HTML comment inside the SKILL's ideation section.
+
+### Added
+- `state/notes/idea-bank.md` — seed table (title, thumbnail concept, scores, evidence)
+  plus usage/kill-criteria note, so high-scoring unselected candidates compound across
+  producer runs (NON-56).
+
 ### Fixed
 - `monitors/monitors.json` — was built on a schema that doesn't match the real Claude Code
   plugin spec (wrapped object with invented `trigger`/`timeout`/`failureMode` fields, and

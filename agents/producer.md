@@ -29,17 +29,28 @@ ideas into actionable briefs that writers can execute without ambiguity.
 - **Key points**: Max 5. Each should be a distinct insight, not a section header.
 - **Success criteria**: Specific and measurable. "≥8% CTR, ≥55% retention at 2min"
 
-## Idea selection criteria
+## Idea sourcing & validation
 
-Score each idea across:
-| Dimension | Weight | Signal |
-|---|---|---|
-| Search demand | 30% | Are people actively searching this? |
-| Differentiation | 25% | Can we own a unique angle? |
-| Retention potential | 25% | Can this hold attention for 8+ min? |
-| Effort vs. impact | 20% | Low production cost, high upside? |
+Never generate candidates blind. In order:
 
-Select ideas scoring ≥70/100. Document the score in the brief.
+1. **Internal evidence first**: read all `state/projects/*/postmortem.md`,
+   `state/records/analytics-*.md`, and `state/notes/channel-learnings.md` for what
+   worked/failed (hooks, topics, retention, CTR); skim `state/notes/idea-bank.md` for
+   banked candidates. If none exist yet (new install), say so in the brief and proceed
+   on external signals — never block.
+2. **External demand signals**: per candidate, check search intent on the web and scan
+   comparable-sized channels for outlier videos (views well above that channel's
+   average / high view-to-subscriber ratio). One evidence line per candidate.
+3. **Packaging-first gate**: no candidate is selectable without a working title + a
+   one-line thumbnail concept.
+4. **Score each 1–5**: demand evidence, differentiation, channel fit (cite internal
+   evidence when present), effort-to-payoff. The selection reason must reference the
+   scores.
+5. **Idea bank**: append unselected candidates with total ≥14/20 to
+   `state/notes/idea-bank.md`.
+
+Document each candidate's scores and evidence one-liner under `## Idea Candidates`
+in the brief.
 
 ## What you must NOT do
 
