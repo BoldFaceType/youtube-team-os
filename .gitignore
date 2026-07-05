@@ -15,6 +15,7 @@ Thumbs.db
 .env
 .env.local
 *.key
+state/secrets/
 
 # Node (for bin/ scripts)
 node_modules/

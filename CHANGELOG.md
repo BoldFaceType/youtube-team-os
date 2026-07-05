@@ -98,6 +98,38 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [1.2.0] — 2026-07-05
+
+### Added
+- `bin/fetch-analytics.js` — plain-script YouTube analytics fetcher (NON-48). Single
+  file, **zero npm dependencies**, Node >= 18 (built-in `fetch`). Fetches per-video
+  public stats from the YouTube Data API v3 (`videos.list?part=statistics`) and, when
+  OAuth is configured, watch-time / retention / subscriber metrics from the YouTube
+  Analytics API v2 (`reports.query`, `ids=channel==MINE`, `filters=video==<id>`), then
+  writes `state/records/analytics-<project-id>.md` in the growth SKILL snapshot format
+  with a `Source:` footer (fetched-at timestamp, mode, API versions). Three modes:
+  `--dry-run` (fixture, no network), `public` (API key only; OAuth-only fields written
+  as `manual (YouTube Studio)`), and `full` (both APIs). Includes an in-file
+  `--authorize` refresh-token helper (Rule of One — no second script). UTC-safe date
+  math throughout, guarding against the TM-6 timezone class of bug. Exit codes: 0 / 1
+  usage / 2 API-auth.
+- `connectors/youtube-analytics.md` — setup guide: GCP project, enabling both APIs,
+  API-key + OAuth Desktop-app client creation, one-time refresh-token acquisition via
+  `--authorize`, env-var reference, per-mode fetch table, and an honest limitations
+  table. **Verified verdict:** `impressions` and `impressionsClickThroughRate` are NOT
+  exposed by the Analytics API v2 (Studio-only), citing the metrics reference (updated
+  2026-05-11); the script marks CTR/Impressions `manual (YouTube Studio)` accordingly.
+
+### Changed
+- Design decision: analytics capture is now a **plain, dependency-free Node script**
+  rather than an MCP connector. This **supersedes the canceled MCP-connector approach
+  (NON-33)** and the manual-input-only fallback in `connectors/youtube-metadata.md`.
+  No runtime npm dependencies were introduced, keeping the plugin install-free.
+- `.gitignore` — added `state/secrets/` so the optional git-ignored
+  `state/secrets/youtube.json` credentials fallback is never committed.
+
+---
+
 ## [1.1.0] — 2026-07-01
 
 ### Added
@@ -153,6 +185,7 @@ Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - `state/` filesystem seeded — role inboxes, notes, records
 - `README.md` — install, usage, and structure docs
 
-[Unreleased]: https://github.com/BoldFaceType/youtube-team-os/compare/v1.1.0...HEAD
+[Unreleased]: https://github.com/BoldFaceType/youtube-team-os/compare/v1.2.0...HEAD
+[1.2.0]: https://github.com/BoldFaceType/youtube-team-os/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/BoldFaceType/youtube-team-os/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/BoldFaceType/youtube-team-os/releases/tag/v1.0.0
